@@ -1,0 +1,64 @@
+version: '2'
+
+services:
+
+  rails:
+    build: .
+    command: bash -c "bundle install && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    container_name: address-project
+    stdin_open: true
+    tty: true
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/opt/app
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=address-project_development
+      - POSTGRES_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+  db:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=address-project_development
+
+
+  
+  postgres:
+    mem_limit: 1Gb
+    image: 'postgres:9.5'
+    volumes_from:
+      - data_database
+    ports:
+      - '5436:5436'
+    environment:
+      POSTGRES_USER: address-project
+      POSTGRES_PASSWORD: address-project
+      POSTGRES_DB: address-project_development
+
+  redis:
+    mem_limit: 1Gb
+    image: redis:4-alpine
+    command: redis-server --appendonly no
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes_from:
+      - data_redis
+
+  data_redis:
+    image: cogniteev/echo
+    command: echo 'Data Container for Redis'
+    volumes:
+      - /data
+
+  data_database:
+    image: cogniteev/echo
+    command: echo 'Data Container for Postgres'
+    volumes:
+      - /var/lib/postgresql/data
