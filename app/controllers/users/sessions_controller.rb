@@ -13,8 +13,7 @@ module Users
           code: 200,
           message: 'Logged in successfully.'
         },
-        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] },
-        token: encode_token(current_user)
+        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
       }, status: :ok
     end
 
