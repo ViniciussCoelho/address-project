@@ -10,9 +10,11 @@ module Users
     def respond_with(current_user, _opts = {})
       render json: {
         status: {
-          code: 200, message: 'Logged in successfully.',
-          data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
-        }
+          code: 200,
+          message: 'Logged in successfully.'
+        },
+        data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] },
+        token: encode_token(current_user)
       }, status: :ok
     end
 
