@@ -4,7 +4,13 @@ class ContactsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @contacts = current_user.contacts
+    @contacts = contact_service.get_contacts(user_id: current_user.id,
+                                             page: params[:page],
+                                             per_page: params[:per_page],
+                                             order_by: params[:sort],
+                                             order: params[:order],
+                                             search: params[:search])
+
     render json: @contacts, status: :ok
   end
 
@@ -65,5 +71,9 @@ class ContactsController < ApplicationController
 
     def contact_params
       params.require(:contact).permit(:name, :cpf, :phone, address: [:street, :number, :complement, :neighborhood, :city, :state, :country, :zipcode, :latitude, :longitude])
+    end
+
+    def contact_service
+      @contact_service ||= ContactService.new
     end
 end
