@@ -18,19 +18,15 @@ class ContactsController < ApplicationController
   end
 
   def create
-    address = contact_params[:address].to_s
-    geocoder = Geokit::Geocoders::GoogleGeocoder
-    geocoder.api_key = 'AIzaSyDx8Iwc6lupBGsj325xV_E5fHAojFfhjMc'
-    location = geocoder.geocode(address)
-  
+    geocoding_result = contact_service.geocode_address(contact_params[:address].to_s)
+
     @contact = Contact.new(contact_params.merge(user_id: current_user.id))
 
-    if location.success
-      @contact.address["latitude"] = location.lat.to_s
-      @contact.address["longitude"] = location.lng.to_s
+    if geocoding_result[:success]
+      @contact.address["latitude"] = geocoding_result[:latitude]
+      @contact.address["longitude"] = geocoding_result[:longitude]
     end
-    
-  
+
     if @contact.save
       render json: @contact, status: :created
     else
@@ -40,15 +36,11 @@ class ContactsController < ApplicationController
   
 
   def update
-    address = contact_params[:address].to_s
-    geocoder = Geokit::Geocoders::GoogleGeocoder
-    geocoder.api_key = 'AIzaSyDx8Iwc6lupBGsj325xV_E5fHAojFfhjMc'
-    location = geocoder.geocode(address)
-  
-    if location.success
-      @contact.address["latitude"] = location.lat.to_s
-      @contact.address["longitude"] = location.lng.to_s
-      @contact.save!
+    geocoding_result = contact_service.geocode_address(contact_params[:address].to_s)
+
+    if geocoding_result[:success]
+      @contact.address["latitude"] = geocoding_result[:latitude]
+      @contact.address["longitude"] = geocoding_result[:longitude]
     end
     
     if @contact.update(contact_params)
@@ -64,16 +56,23 @@ class ContactsController < ApplicationController
     render json: { status: 200, message: 'Contact deleted successfully.' }, status: :ok
   end
 
+  def address_by_zipcode
+    response = contact_service.get_address_by_zipcode(zipcode: params[:address][:zipcode])
+
+    render json: response, status: response[:status]
+  end
+
   private
-    def set_contact
-      @contact = Contact.find(params[:id])
-    end
 
-    def contact_params
-      params.require(:contact).permit(:name, :cpf, :phone, address: [:street, :number, :complement, :neighborhood, :city, :state, :country, :zipcode, :latitude, :longitude])
-    end
+  def set_contact
+    @contact = Contact.find(params[:id])
+  end
 
-    def contact_service
-      @contact_service ||= ContactService.new
-    end
+  def contact_params
+    params.require(:contact).permit(:name, :cpf, :phone, address: [:street, :number, :complement, :neighborhood, :city, :state, :country, :zipcode, :latitude, :longitude])
+  end
+
+  def contact_service
+    @contact_service ||= ContactService.new
+  end
 end

@@ -17,4 +17,5 @@ Rails.application.routes.draw do
   end
 
   resources :contacts
+  get 'address_by_zipcode', to: 'contacts#address_by_zipcode'
 end
