@@ -11,7 +11,7 @@ class ContactsController < ApplicationController
                                              order: params[:order],
                                              search: params[:search])
 
-    render json: @contacts, status: :ok
+    render json: { contacts: @contacts, total_pages: @contacts.total_pages }, status: :ok
   end
 
   def show

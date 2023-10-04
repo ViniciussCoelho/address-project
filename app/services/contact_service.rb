@@ -9,7 +9,7 @@ class ContactService
     contacts = Contact.where(user_id: user_id).order("LOWER(#{order_by}) #{order}")
 
     if search.present?
-      contacts = contacts.where('name ILIKE ? or cpf ILIKE ?', "%#{search}%", "%#{search.gsub(/\D/, '')}%")
+      contacts = contacts.where('name ILIKE ? or cpf ILIKE ?', "%#{search}%", "%#{search.gsub(/[-.*]/, '')}%")
     end
 
     contacts.paginate(page: page, per_page: per_page)
