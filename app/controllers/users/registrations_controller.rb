@@ -6,7 +6,13 @@ module Users
     respond_to :json
 
     def destroy
-      current_user.destroy
+      password = params[:password]
+
+      if current_user.valid_password?(password) 
+        current_user.destroy
+      else 
+        return render json: { status: { code: 401, message: 'Invalid password.' } }, status: :unauthorized
+      end
   
       render json: { status: { code: 200, message: 'User deleted successfully.' } }, status: :ok
     end
