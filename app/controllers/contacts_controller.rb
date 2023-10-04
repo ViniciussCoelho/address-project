@@ -7,7 +7,6 @@ class ContactsController < ApplicationController
     @contacts = contact_service.get_contacts(user_id: current_user.id,
                                              page: params[:page],
                                              per_page: params[:per_page],
-                                             order_by: params[:sort],
                                              order: params[:order],
                                              search: params[:search])
 
