@@ -1,7 +1,7 @@
 class ContactsController < ApplicationController
   respond_to :json
   before_action :set_contact, only: %i[ show update destroy ]
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:address_by_zipcode]
 
   def index
     @contacts = contact_service.get_contacts(user_id: current_user.id,
@@ -56,6 +56,8 @@ class ContactsController < ApplicationController
   end
 
   def address_by_zipcode
+    return render json: { status: 400, message: 'Zipcode is required.' }, status: :bad_request if params[:address].blank? || params[:address][:zipcode].blank?
+
     response = contact_service.get_address_by_zipcode(zipcode: params[:address][:zipcode])
 
     render json: response, status: response[:status]
