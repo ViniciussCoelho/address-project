@@ -5,13 +5,14 @@ class Contact < ApplicationRecord
   before_save :format_phone
   before_save :format_cpf
 
-  validates :cpf, presence: true, uniqueness: { scope: :user_id }
   validates :name, presence: true
   validates :phone, presence: true
   validates :address, presence: true
-
+  validates :cpf, presence: true
+  
   validate :cpf_valid?
-
+  validate :cpf_has_been_taken
+  
   def format_cep
     self.address["zipcode"] = self.address["zipcode"].gsub(/\D/, '')
   end
@@ -28,5 +29,11 @@ class Contact < ApplicationRecord
     return if cpf.blank?
 
     errors.add(:cpf, 'CPF inválido') unless CPF.valid?(cpf)
+  end
+
+  def cpf_has_been_taken
+    return if cpf.blank?
+
+    errors.add(:cpf, 'CPF já cadastrado') if Contact.where.not(id: id).where(cpf: cpf.gsub(/\D/, ''), user_id: user_id).exists?
   end
 end
